@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * The main application uses these four components
@@ -17,12 +17,37 @@ import {
   buildCellList
 } from '../utils';
 
+const getCellListFromLocal = () => {
+  let cellList = JSON.parse(localStorage.getItem('cellList'));
+
+  if (cellList) {
+    return cellList;
+  }
+  return buildCellList();
+}
+
+const setCellListOnLocal = (cellList) => {
+  localStorage.setItem('cellList', JSON.stringify(cellList));
+}
+
 /**
  * The App component represents our entire application. It contains all of the
  * top level components, and is responsible for helping its children communicate 
  * with each other via state objects, and state functions.
  */
 const App = () => {
+  const [activeColor, setActiveColor] = useState(COLORS[0]);
+  const [cellList, _setCellList] = useState([]);
+ 
+  const setCellList = (newCellList) => {
+    setCellListOnLocal(newCellList)
+    _setCellList(newCellList)
+  }
+ 
+  useEffect(() => {
+    _setCellList(getCellListFromLocal())
+  }, [])
+ 
   /**
    * Using useState you need to create:
    * 
@@ -34,11 +59,20 @@ const App = () => {
     {/* Header needs no props */}
     <Header />
     {/* Palette needs to be passed activeColor and setActiveColor */}
-    <Palette />
+    <Palette  
+    activeColor={ activeColor }
+    setActiveColor={setActiveColor}/>
     {/* Grid needs to be passed activeColor, cellList, and setCellList */}
-    <Grid />
+    <Grid 
+    activeColor={ activeColor }
+    cellList={ cellList }
+    setCellList= {setCellList}/>
     {/* ActionPanel needs to be passed activeColor, cellList, and setCellList */}
-    <ActionPanel />
+    <ActionPanel 
+    activeColor= {activeColor}
+    cellList= {cellList}
+    setCellList={setCellList}
+    />
   </div>
 }
 
